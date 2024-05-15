@@ -1,2 +1,7 @@
 # local-broadcast
-A library to send message to all instances of the current running program on local LAN
+
+A python library to send message to all instances of the current running program on local LAN
+
+## WIP
+
+Work in progress, not ready for use yet.
