@@ -1,6 +1,6 @@
 [project]
 name = "local_broadcast"
-version = "0.0.2"
+version = "0.0.6"
 authors = [
   { name="Roberto Gambuzzi", email="gambuzzi@gmail.com" },
 ]
