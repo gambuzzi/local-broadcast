@@ -34,3 +34,12 @@ python3 -m build
 python3 -m pip install --upgrade twine
 python3 -m twine upload dist/*
 ```
+
+## to create a new release in github and on pypi
+
+- update version in pyproject.toml
+- run (changing the version number)
+```
+git tag -a "0.0.7" -m "0.0.7"
+git push --tags
+```
