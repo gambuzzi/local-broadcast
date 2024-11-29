@@ -18,6 +18,10 @@ dependencies = [
   "zeroconf",
 ]
 
+[build-system]
+requires      = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project.urls]
 Homepage = "https://github.com/gambuzzi/local-broadcast"
 Issues = "https://github.com/gambuzzi/local-broadcast/issues"
