@@ -14,6 +14,12 @@ Work in progress, not ready for use yet.
 pip3 install local_broadcast@git+https://github.com/gambuzzi/local-broadcast
 ```
 
+## dev mode install
+
+```
+python -m pip install -e .
+```
+
 ## example
 
 ```

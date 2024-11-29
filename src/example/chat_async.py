@@ -1,11 +1,12 @@
-from local_broadcast import init
 import asyncio
-from curses import ERR, KEY_F9, curs_set, wrapper
 import curses
 import signal
-from random import randint
+from curses import ERR, KEY_F9, curs_set, wrapper
 
-async def display_main(stdscr):  
+from local_broadcast import init
+
+
+async def display_main(stdscr):
     done = False
 
     curs_set(2)
@@ -26,7 +27,7 @@ async def display_main(stdscr):
     # Create status window
     curses.start_color()
     curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_YELLOW)
-    
+
     status_win = stdscr.subwin(1, curses.COLS, curses.LINES - 1, 0)
     status_win.bkgd(" ", curses.color_pair(1))
     status_win.addstr(0, 0, status_bar, curses.color_pair(1))
@@ -65,11 +66,8 @@ async def display_main(stdscr):
         top_win.refresh()
 
     async def set_status(msg):
-        status_win.addstr(
-            0, 0, f"{status_bar} - current host: {msg}", curses.color_pair(1)
-        )
+        status_win.addstr(0, 0, f"{status_bar} - current host: {msg}", curses.color_pair(1))
         status_win.refresh()
-
 
     # create a task to run the zeroconf service
     # asyncio.create_task(zeroconf_init(top_win_addstr))
@@ -90,7 +88,7 @@ async def display_main(stdscr):
             await send_string(buffer)
             buffer = ""
             draw_buffer(buffer)
-        elif (char == "\x7f" or char == 263 ) and buffer:
+        elif (char == "\x7f" or char == 263) and buffer:
             buffer = buffer[:-1]
             draw_buffer(buffer)
         elif isinstance(char, str) and char.isprintable():
@@ -102,8 +100,10 @@ async def display_main(stdscr):
 
     await deinit()
 
+
 def main(stdscr) -> None:
     return asyncio.run(display_main(stdscr))
+
 
 if __name__ == "__main__":
     wrapper(main)

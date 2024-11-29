@@ -1,13 +1,11 @@
 import asyncio
 import socket
-
 from random import randint
-
-from zeroconf import ServiceStateChange, Zeroconf
-from zeroconf.asyncio import AsyncServiceBrowser, AsyncServiceInfo, AsyncZeroconf
 
 import zmq
 import zmq.asyncio
+from zeroconf import ServiceStateChange, Zeroconf
+from zeroconf.asyncio import AsyncServiceBrowser, AsyncServiceInfo, AsyncZeroconf
 
 
 def on_service_state_change(state_change_callback):
@@ -18,16 +16,17 @@ def on_service_state_change(state_change_callback):
 
     def fx(zeroconf, service_type, name, state_change):
         asyncio.ensure_future(async_fx(zeroconf, service_type, name, state_change))
-    
+
     return fx
+
 
 async def zeroconf_init(service_info, service_type, state_change_callback):
     zeroconf = AsyncZeroconf()
 
     await zeroconf.async_register_service(service_info)
 
-    browser = AsyncServiceBrowser(zeroconf.zeroconf, [service_type], handlers=[on_service_state_change(state_change_callback)])
-    
+    AsyncServiceBrowser(zeroconf.zeroconf, [service_type], handlers=[on_service_state_change(state_change_callback)])
+
     return zeroconf
 
 
@@ -64,18 +63,16 @@ async def subscriber(socket, action):
         try:
             message = await socket.recv_string(flags=zmq.NOBLOCK)
             await action(message)
-        except zmq.error.Again as e:
+        except zmq.error.Again:
             await asyncio.sleep(0.1)
 
 
-async def init(
-    clan, subscriber_action, statusbar_callback=None, transform=None, base_port=None
-):
+async def init(clan, subscriber_action, statusbar_callback=None, transform=None, base_port=None):
     # zeromq section
     zmq_context = zmq.asyncio.Context()
     push_socket = zmq_context.socket(zmq.PUSH)
     sub_socket = zmq_context.socket(zmq.SUB)
-    
+
     if base_port is None:
         base_port = randint(8000, 8999)
 
@@ -91,29 +88,26 @@ async def init(
         0,
         addresses=[get_ip()],
     )
-        
+
     async def state_callback(service_type, name, state_change, info):
         if state_change == ServiceStateChange.Added or state_change == ServiceStateChange.Updated:
             services_seen[name] = info
         elif state_change == ServiceStateChange.Removed:
             del services_seen[name]
-            
+
         host = min(
-            [
-                (info.parsed_addresses()[0], int(info.port))
-                for info in services_seen.values()
-            ],
+            [(info.parsed_addresses()[0], int(info.port)) for info in services_seen.values()],
             default=("localhost", 8080),
         )
         base_host = f"tcp://{host[0]}:{host[1]}"
-    
+
         if statusbar_callback is not None:
             await statusbar_callback(base_host)
 
         push_socket.connect(base_host)
         sub_socket.connect(f"tcp://{host[0]}:{host[1]+1}")
-        sub_socket.setsockopt_string(zmq.SUBSCRIBE, "")                
-    
+        sub_socket.setsockopt_string(zmq.SUBSCRIBE, "")
+
     zeroconf = await zeroconf_init(ws_info, service_type, state_callback)
 
     # background tasks: forwarder, and subscriber
@@ -122,7 +116,7 @@ async def init(
 
     async def send_string(msg):
         push_socket.send_string(msg)
-    
+
     async def lib_deinit():
         await zeroconf.async_unregister_service(ws_info)
         await zeroconf.async_close()
